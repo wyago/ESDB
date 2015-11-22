@@ -1,7 +1,12 @@
 #ifndef BLOCK_LIST_H_INCLUDED
 #define BLOCK_LIST_H_INCLUDED
 
-struct block;
+struct block {
+    int min_value;
+    char *contained;
+    char *values;
+    struct block *next;
+};
 
 struct block_list {
 	struct block *head;

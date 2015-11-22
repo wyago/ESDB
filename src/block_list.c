@@ -2,13 +2,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-struct block {
-	int min_value;
-	char *contained;
-	char *values;
-	struct block *next;
-};
-
 struct block_list make_block_list(int block_size, int item_size) {
 	struct block_list list;
 	list.block_size = block_size;

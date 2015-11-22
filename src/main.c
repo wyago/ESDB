@@ -39,36 +39,35 @@ int main(void) {
 	float lastTime = glfwGetTime();
 
 	while (!glfwWindowShouldClose(window)) {
-		//glClear(GL_COLOR_BUFFER_BIT);
-		//glBegin(GL_POINTS);
+		glClear(GL_COLOR_BUFFER_BIT);
+		glBegin(GL_POINTS);
 
-		struct block_list_iterator it1 = iterate(position);
-		struct block_list_iterator it2 = iterate(velocity);
-		while (available(it1) && available(it2)) {
-			long int key1 = current_key(it1);
-			long int key2 = current_key(it2);
+		struct block *it1 = position.head;
+		struct block *it2 = velocity.head;
+		while (it1 != 0x0 && it2 != 0x0) {
+			if (it1->min_value == it2->min_value) {
+                int j = 0;
+                for (j = 0; j < position.block_size; ++j) {
+                    if (it1->contained[j] && it2->contained[j]) {
+                        ((struct vec2f*)it1->values)->x += ((struct vec2f*)it2->values)->x;
+                        ((struct vec2f*)it1->values)->y += ((struct vec2f*)it2->values)->y;
+				        if (pos->x < 1 && pos->x > -1 &&
+				            pos->y < 1 && pos->y > -1)
+				            glVertex2f(pos->x, pos->y);
+                    }
+                }
 
-			if (key1 == key2) { // key1 == key2
-				struct vec2f *pos = (struct vec2f*)current(it1);
-				struct vec2f *vel = (struct vec2f*)current(it2);
 
-				pos->x += vel->x;
-				pos->y += vel->y;
-
-				//if (pos->x < 1 && pos->x > -1 &&
-				//	pos->y < 1 && pos->y > -1)
-				//glVertex2f(pos->x, pos->y);
-
-				it1 = next(it1);
-				it2 = next(it2);
-			} else if (key1 < key2) {
-				it1 = next(it1);
+				it1 = it1->next;
+				it2 = it2->next;
+			} else if (it1->min_value < it2->min_value) {
+				it1 = it1->next;
 			} else  { // if (key2 < key1) 
-				it2 = next(it2);
+				it2 = it2->next;
 			}
 		}
 
-		//glEnd();
+		glEnd();
 
 		if (!glfwGetKey(window, 'S')) {
 			for (i = 0; i < 1000; ++i) {
