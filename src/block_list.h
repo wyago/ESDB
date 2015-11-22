@@ -1,12 +1,7 @@
 #ifndef BLOCK_LIST_H_INCLUDED
 #define BLOCK_LIST_H_INCLUDED
 
-struct block {
-    int min_value;
-    char *contained;
-    char *values;
-    struct block *next;
-};
+struct block;
 
 struct block_list {
 	struct block *head;
@@ -14,24 +9,18 @@ struct block_list {
 	int item_size;
 };
 
-struct block_list_iterator {
-	struct block *current;
-	int index;
-	int block_size;
-	int item_size;
-};
-
 struct block_list make_block_list(int block_size, int item_size);
 
-// Insert or remove a series of items from the block list. The keys MUST be ordered ascending. This allows
-// for the optimization of traversing the list a single time.
+// Insert or remove a series of items from the block list. The keys MUST be 
+// ordered ascending. This allows for the optimization of traversing the list 
+// a single time.
 void block_insert(struct block_list list, long int *keys, void *items, int n_items);
 void block_remove(struct block_list list, long int *keys, int n_keys);
 
-struct block_list_iterator iterate(struct block_list list);
-void *current(struct block_list_iterator iterator);
-long int current_key(struct block_list_iterator iterator);
-struct block_list_iterator next(struct block_list_iterator iterator);
-char available(struct block_list_iterator iterator);
+// A function that allows you to act on any number of blocks where the keys of
+// the values are the same. The variadic arguments are all expected to be 
+// block_lists and the function is called for every set of values from the
+// lists where the keys of those values are all equal.
+void block_act(void (*f)(void **), int n_lists, ...);
 
 #endif // SORTED_BLOCKS_H_INCLUDED

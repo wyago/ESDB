@@ -9,6 +9,13 @@ struct vec2f {
 	float x, y;
 };
 
+void move(struct vec2f **items) {
+    struct vec2f *pos = items[0];
+    struct vec2f *vel = items[1];
+    pos->x += vel->x;
+    pos->y += vel->y;
+}
+
 int main(void) {
 	struct block_list position = make_block_list(1024, sizeof(struct vec2f));
 	struct block_list velocity = make_block_list(1024, sizeof(struct vec2f));
@@ -42,30 +49,7 @@ int main(void) {
 		glClear(GL_COLOR_BUFFER_BIT);
 		glBegin(GL_POINTS);
 
-		struct block *it1 = position.head;
-		struct block *it2 = velocity.head;
-		while (it1 != 0x0 && it2 != 0x0) {
-			if (it1->min_value == it2->min_value) {
-                int j = 0;
-                for (j = 0; j < position.block_size; ++j) {
-                    if (it1->contained[j] && it2->contained[j]) {
-                        ((struct vec2f*)it1->values)->x += ((struct vec2f*)it2->values)->x;
-                        ((struct vec2f*)it1->values)->y += ((struct vec2f*)it2->values)->y;
-				        if (pos->x < 1 && pos->x > -1 &&
-				            pos->y < 1 && pos->y > -1)
-				            glVertex2f(pos->x, pos->y);
-                    }
-                }
-
-
-				it1 = it1->next;
-				it2 = it2->next;
-			} else if (it1->min_value < it2->min_value) {
-				it1 = it1->next;
-			} else  { // if (key2 < key1) 
-				it2 = it2->next;
-			}
-		}
+        block_act((void (*)(void **))move, 2, position, velocity);
 
 		glEnd();
 
@@ -88,8 +72,8 @@ int main(void) {
 		printf("%f\n", delta);
 
 
-		//glfwSwapBuffers(window);
-		//glfwPollEvents();
+		glfwSwapBuffers(window);
+		glfwPollEvents();
 	}
 
 	glfwTerminate();
