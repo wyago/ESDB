@@ -1,7 +1,6 @@
 #include "block_list.h"
 #include <string.h>
 #include <stdlib.h>
-#include <stdarg.h>
 
 struct block {
     int min_value;
@@ -23,7 +22,7 @@ struct block_list make_block_list(int block_size, int item_size) {
 	return list;
 }
 
-void block_insert(struct block_list list, long int *keys, void *items, int n_items) {
+void block_insert(struct block_list list, long int *keys, void **items, int n_items) {
 	struct block *current = list.head;
 
 	// This can be thought of as a kind of merge. We iterate through 'keys' and 
@@ -45,7 +44,7 @@ void block_insert(struct block_list list, long int *keys, void *items, int n_ite
 			current = current->next;
 		} else if (keys[i] >= current->min_value) {// keys[i] < min_value + list.block_size
 			int block_index = keys[i] - current->min_value;
-			memcpy(current->values + (block_index * list.item_size), items + (i * list.item_size), list.item_size);
+			memcpy(current->values + (block_index * list.item_size), items[i], list.item_size);
 			current->contained[block_index] = 1;
 			i += 1;
 		} else {
@@ -79,8 +78,7 @@ void block_remove(struct block_list list, long int *keys, int n_keys) {
 	}
 }
 
-void block_act(void (*f)(void **), int n_lists, ...) {
-    va_list block_args;
+void block_act(struct esdb *db, void (*f)(struct esdb *, void **), int n_lists, struct block_list *lists) {
     int i;
     int j;
     struct block **blocks = malloc(n_lists * sizeof(struct block*));
@@ -88,14 +86,11 @@ void block_act(void (*f)(void **), int n_lists, ...) {
     void **args = malloc(n_lists * sizeof(void*));
     int block_size;
 
-    va_start(block_args, n_lists);
     for (i = 0; i < n_lists; ++i) {
-        struct block_list list = va_arg(block_args, struct block_list);
-        blocks[i] = list.head;
-        block_size = list.block_size;
-        sizes[i] = list.item_size;
+        blocks[i] = lists[i].head;
+        block_size = lists[i].block_size;
+        sizes[i] = lists[i].item_size;
     }
-    va_end(block_args);
 
     while (1) {
         char allEqual = 1;
@@ -126,7 +121,7 @@ void block_act(void (*f)(void **), int n_lists, ...) {
             }
 
             if (contained) {
-                f(args);
+                f(db, args);
             }
         }
 

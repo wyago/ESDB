@@ -3,22 +3,25 @@
 
 #include <GLFW/glfw3.h>
 
+#include "esdb.h"
 #include "block_list.h"
 
 struct vec2f {
 	float x, y;
 };
 
-void move(struct vec2f **items) {
+void move(struct esdb *db, struct vec2f **items) {
     struct vec2f *pos = items[0];
     struct vec2f *vel = items[1];
     pos->x += vel->x;
     pos->y += vel->y;
+    
+    if (pos->x < 1 && pos->x > -1 &&
+        pos->y < 1 && pos->y > -1)
+    glVertex2f(pos->x, pos->y);
 }
 
 int main(void) {
-	struct block_list position = make_block_list(1024, sizeof(struct vec2f));
-	struct block_list velocity = make_block_list(1024, sizeof(struct vec2f));
 	GLFWwindow* window;
 
 	srand(12);
@@ -32,48 +35,51 @@ int main(void) {
 	}
 
 	glfwMakeContextCurrent(window);
-	long int newKeys[1000];
-	struct vec2f newPositions[1000];
-	struct vec2f newVelocities[1000];
-	int i;
-	for (i = 0; i < 1000; ++i) {
-		newPositions[i].x = 0;
-		newPositions[i].y = 0;
-	}
 
-	long int nextKey = 1;
+    struct esdb *db = make_esdb(1, 1024);
+    int positions = register_component(db, sizeof(struct vec2f));
+    int velocities = register_component(db, sizeof(struct vec2f));
 
 	float lastTime = glfwGetTime();
 
 	while (!glfwWindowShouldClose(window)) {
 		glClear(GL_COLOR_BUFFER_BIT);
 		glBegin(GL_POINTS);
-
-        block_act((void (*)(void **))move, 2, position, velocity);
+        
+        int components[2] = { positions, velocities };
+        esdb_act(db, (void (*)(struct esdb*, void **))move, 2, components);
 
 		glEnd();
 
 		if (!glfwGetKey(window, 'S')) {
-			for (i = 0; i < 1000; ++i) {
-				newVelocities[i].x = (rand() % 100 - 50) * 0.001f;
-				newVelocities[i].y = (rand() % 100 - 50) * 0.001f;
-				newKeys[i] = nextKey + i;
-			}
-			nextKey += 1000;
-			block_insert(position, newKeys, newPositions, 1000);
-			block_insert(velocity, newKeys, newVelocities, 1000);
+            int i;
+            for (i = 0; i < 100; ++i) {
+                struct vec2f *newPosition = malloc(sizeof(struct vec2f));
+                struct vec2f *newVelocity = malloc(sizeof(struct vec2f));
+                int *ids = malloc(2 * sizeof(int));
+                void **data = malloc(2 * sizeof(void*));
+                ids[0] = positions;
+                ids[1] = velocities;
+                
+                newPosition->x = 0;
+                newPosition->y = 0;
+                newVelocity->x = (rand()%1000)/10000.0f - 1000/10000.0f*0.5f;
+                newVelocity->y = (rand()%1000)/10000.0f - 1000/10000.0f*0.5f;
+                
+                data[0] = newPosition;
+                data[1] = newVelocity;
+                queue_entity(db, 2, ids, data);
+            }
 		}
-
-		printf("%d\t", nextKey);
 
 		float time = glfwGetTime();
 		float delta = time - lastTime;
 		lastTime = time;
-		printf("%f\n", delta);
-
+		printf("%f\n", 1.0f/delta);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+		flush_queues(db);
 	}
 
 	glfwTerminate();
