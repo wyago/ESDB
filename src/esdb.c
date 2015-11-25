@@ -118,7 +118,6 @@ void flush_queues(struct esdb *db) {
             }
         }
         sort(change_count, keys, data);
-        printf("%d\n", change_count);
         block_insert(db->lists[i], keys, data, change_count);
     }
     
@@ -136,9 +135,17 @@ void flush_queues(struct esdb *db) {
 }
 
 void sort(int n, long int *keys, void **data) {
-    // Currently selection sort for simplicity.
     int i;
     int j;
+    int sorted = 1;
+    for (i = 0; i < n-1; ++i) {
+        if (keys[i] < keys[i+1]) {
+            sorted = 0;
+            break;
+        }
+    }
+    if (!sorted) return;
+    // Currently selection sort for simplicity.
     for (i = 0; i < n; ++i) {
         long int min = INT_MAX;
         int pos = 0;

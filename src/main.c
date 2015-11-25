@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 #include <stdlib.h>
 
 #include <GLFW/glfw3.h>
@@ -15,7 +16,12 @@ void move(struct esdb *db, struct vec2f **items) {
     struct vec2f *vel = items[1];
     pos->x += vel->x;
     pos->y += vel->y;
-    
+
+    float r = rand() / (float)RAND_MAX * 0.02f;
+
+    vel->x = vel->x * cos(r) - vel->y * sin(r);
+    vel->y = vel->x * sin(r) + vel->y * cos(r);
+
     if (pos->x < 1 && pos->x > -1 &&
         pos->y < 1 && pos->y > -1)
     glVertex2f(pos->x, pos->y);
@@ -35,6 +41,7 @@ int main(void) {
 	}
 
 	glfwMakeContextCurrent(window);
+    glfwSwapInterval(0);
 
     struct esdb *db = make_esdb(1, 1024);
     int positions = register_component(db, sizeof(struct vec2f));
@@ -53,7 +60,7 @@ int main(void) {
 
 		if (!glfwGetKey(window, 'S')) {
             int i;
-            for (i = 0; i < 100; ++i) {
+            for (i = 0; i < 10; ++i) {
                 struct vec2f *newPosition = malloc(sizeof(struct vec2f));
                 struct vec2f *newVelocity = malloc(sizeof(struct vec2f));
                 int *ids = malloc(2 * sizeof(int));
@@ -63,8 +70,8 @@ int main(void) {
                 
                 newPosition->x = 0;
                 newPosition->y = 0;
-                newVelocity->x = (rand()%1000)/10000.0f - 1000/10000.0f*0.5f;
-                newVelocity->y = (rand()%1000)/10000.0f - 1000/10000.0f*0.5f;
+                newVelocity->x = (rand()%1000)/100000.0f - 1000/100000.0f*0.5f;
+                newVelocity->y = (rand()%1000)/100000.0f - 1000/100000.0f*0.5f;
                 
                 data[0] = newPosition;
                 data[1] = newVelocity;
