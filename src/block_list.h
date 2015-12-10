@@ -22,4 +22,6 @@ void block_remove(struct block_list list, long int *keys, int n_keys);
 // the values are the same.
 void block_act(struct esdb *db, void (*f)(struct esdb*, long int entity_id, void **), int n_lists, struct block_list *lists);
 
+void block_swap(struct block_list list);
+
 #endif // SORTED_BLOCKS_H_INCLUDED

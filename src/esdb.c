@@ -95,7 +95,7 @@ void free_entity(struct esdb *db, long int id) {
 }
 
 void sort(int n, long int *keys, void **data);
-void flush_queues(struct esdb *db) {
+void swap_buffers(struct esdb *db) {
     int i;
     int j;
     int k;
@@ -133,6 +133,10 @@ void flush_queues(struct esdb *db) {
     db->n_queued = 0;
     free(keys);
     free(data);
+
+    for (i = 0; i < db->n_lists; ++i) {
+        block_swap(db->lists[i]);
+    }
 }
 
 void sort(int n, long int *keys, void **data) {

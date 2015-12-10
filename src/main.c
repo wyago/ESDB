@@ -86,7 +86,7 @@ int main(void) {
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
-		flush_queues(db);
+		swap_buffers(db);
 	}
 
 	glfwTerminate();

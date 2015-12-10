@@ -17,6 +17,6 @@ void queue_entity(struct esdb *db, int n_components, int *component_ids,
 
 void free_entity(struct esdb *db, long int id);
 
-void flush_queues(struct esdb *db);
+void swap_buffers(struct esdb *db);
 
 #endif

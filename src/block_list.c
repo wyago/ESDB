@@ -6,6 +6,7 @@ struct block {
     int min_key;
     char *contained;
     char *values;
+    char *buffer;
     struct block *next;
 };
 
@@ -15,10 +16,11 @@ struct block_list make_block_list(int block_size, int item_size) {
 	list.item_size = item_size;
 
 	list.head =  malloc(sizeof(struct block));
-	list.head ->min_key = 0;
-	list.head ->values = malloc(list.item_size * list.block_size);
-	list.head ->contained = calloc(list.block_size, 1);
-	list.head ->next = 0x0;
+	list.head->min_key = 0;
+	list.head->values = malloc(list.item_size * list.block_size);
+	list.head->buffer = malloc(list.item_size * list.block_size);
+	list.head->contained = calloc(list.block_size, 1);
+	list.head->next = 0x0;
 	return list;
 }
 
@@ -37,6 +39,7 @@ void block_insert(struct block_list list, long int *keys, void **items, int n_it
 				current->next = malloc(sizeof(struct block));
 				current->next->min_key = (keys[i] / list.block_size) * list.block_size;
 				current->next->values = malloc(list.item_size * list.block_size);
+				current->next->buffer = malloc(list.item_size * list.block_size);
 				current->next->contained = calloc(list.block_size, 1);
 				current->next->next = farNext;
 			}
@@ -121,7 +124,7 @@ void block_act(struct esdb *db, void (*f)(struct esdb *, long int entity_id, voi
             }
 
             if (contained) {
-                f(db, blocks[j]->min_key + i, args);
+                f(db, blocks[0]->min_key + i, args);
             }
         }
 
@@ -134,4 +137,16 @@ void block_act(struct esdb *db, void (*f)(struct esdb *, long int entity_id, voi
     free(blocks);
     free(sizes);
     free(args);
+}
+
+void block_swap(struct block_list list) {
+    struct block *current = list.head;
+    while(current != 0x0) {
+        char *temp = current->values;
+        current->values = current->buffer;
+        current->buffer = temp;
+
+        memcpy(current->values, current->buffer, list.block_size * list.item_size);
+        current = current->next;
+    }
 }

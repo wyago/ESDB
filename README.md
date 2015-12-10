@@ -17,7 +17,7 @@ void queue_entity(struct esdb *db, int n_components, int *component_ids,
 
 void free_entity(struct esdb *db, long int id);
 
-void flush_queues(struct esdb *db);
+void swap_buffers(struct esdb *db);
 ```
 
 To initialize a DB, you use `make_esdb` and `register_component`. The first_id 
@@ -48,5 +48,5 @@ data for those components.
 `free_entity` similarly is not instantaneous. It queues the action so it doesn't
 interfere with ongoing iteration. `id` is the ID of the entity to remove.
 
-`flush_queues` should be run at the end of the frame to enact all the queued 
-changes.
+`swap_buffers` should be run at the end of the frame to enact all the queued 
+changes, and to swap the data buffers in the block lists.
