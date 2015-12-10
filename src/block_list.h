@@ -20,6 +20,6 @@ void block_remove(struct block_list list, long int *keys, int n_keys);
 
 // A function that allows you to act on any number of blocks where the keys of
 // the values are the same.
-void block_act(struct esdb *db, void (*f)(struct esdb*, void **), int n_lists, struct block_list *lists);
+void block_act(struct esdb *db, void (*f)(struct esdb*, long int entity_id, void **), int n_lists, struct block_list *lists);
 
 #endif // SORTED_BLOCKS_H_INCLUDED

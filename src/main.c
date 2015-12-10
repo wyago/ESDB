@@ -11,7 +11,7 @@ struct vec2f {
 	float x, y;
 };
 
-void move(struct esdb *db, struct vec2f **items) {
+void move(struct esdb *db, long int entity_id, struct vec2f **items) {
     struct vec2f *pos = items[0];
     struct vec2f *vel = items[1];
     pos->x += vel->x;
@@ -54,7 +54,7 @@ int main(void) {
 		glBegin(GL_POINTS);
         
         int components[2] = { positions, velocities };
-        esdb_act(db, (void (*)(struct esdb*, void **))move, 2, components);
+        esdb_act(db, (void (*)(struct esdb*, long int, void **))move, 2, components);
 
 		glEnd();
 

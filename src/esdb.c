@@ -55,7 +55,8 @@ int register_component(struct esdb *db, int component_size) {
     return db->n_lists - 1;
 }
 
-void esdb_act(struct esdb *db, void (*f)(struct esdb *, void **),
+void esdb_act(struct esdb *db,
+    void (*f)(struct esdb *, long int entity_id, void **),
     int n_components, int *components) {
     int i;
     struct block_list *lists = malloc(n_components * sizeof(struct block_list));

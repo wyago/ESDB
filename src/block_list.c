@@ -78,7 +78,7 @@ void block_remove(struct block_list list, long int *keys, int n_keys) {
 	}
 }
 
-void block_act(struct esdb *db, void (*f)(struct esdb *, void **), int n_lists, struct block_list *lists) {
+void block_act(struct esdb *db, void (*f)(struct esdb *, long int entity_id, void **), int n_lists, struct block_list *lists) {
     int i;
     int j;
     struct block **blocks = malloc(n_lists * sizeof(struct block*));
@@ -121,7 +121,7 @@ void block_act(struct esdb *db, void (*f)(struct esdb *, void **), int n_lists, 
             }
 
             if (contained) {
-                f(db, args);
+                f(db, blocks[j]->min_key + i, args);
             }
         }
 
