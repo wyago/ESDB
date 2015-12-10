@@ -1,2 +1,2 @@
-: foreach src/*.c |> gcc -Wall -std=c99 -c %f -o %o -I ~/dev/c/lib/glfw-3.1.2/include/ |> obj/%B.o
-: obj/*.o |> gcc %f -o %o -lglfw3 -lX11 -lXrandr -lXi -lXxf86vm -lGL -ldl -lpthread -lm -lXinerama -lXcursor |> bin/esdb
+: foreach src/*.c |> clang -Wall -std=c99 -c %f -o %o -I ~/dev/c/lib/glfw-3.1.2/include/ |> obj/%B.o
+: obj/*.o |> clang %f -o %o -lglfw3 -lX11 -lXrandr -lXi -lXxf86vm -lGL -ldl -lpthread -lm -lXinerama -lXcursor |> bin/esdb
