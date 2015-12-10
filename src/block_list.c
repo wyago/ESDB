@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 struct block {
-    int min_value;
+    int min_key;
     char *contained;
     char *values;
     struct block *next;
@@ -15,7 +15,7 @@ struct block_list make_block_list(int block_size, int item_size) {
 	list.item_size = item_size;
 
 	list.head =  malloc(sizeof(struct block));
-	list.head ->min_value = 0;
+	list.head ->min_key = 0;
 	list.head ->values = malloc(list.item_size * list.block_size);
 	list.head ->contained = calloc(list.block_size, 1);
 	list.head ->next = 0x0;
@@ -30,20 +30,20 @@ void block_insert(struct block_list list, long int *keys, void **items, int n_it
 	// space for an item does not exist, we create it.
 	int i = 0;
 	while (current != 0x0 && i < n_items) {
-		if (keys[i] >= current->min_value + list.block_size) {
+		if (keys[i] >= current->min_key + list.block_size) {
 			if (current->next == 0x0 ||
-				current->next->min_value > keys[i]) {
+				current->next->min_key > keys[i]) {
 				struct block *farNext = current->next;
 				current->next = malloc(sizeof(struct block));
-				current->next->min_value = (keys[i] / list.block_size) * list.block_size;
+				current->next->min_key = (keys[i] / list.block_size) * list.block_size;
 				current->next->values = malloc(list.item_size * list.block_size);
 				current->next->contained = calloc(list.block_size, 1);
 				current->next->next = farNext;
 			}
 
 			current = current->next;
-		} else if (keys[i] >= current->min_value) {// keys[i] < min_value + list.block_size
-			int block_index = keys[i] - current->min_value;
+		} else if (keys[i] >= current->min_key ) {// keys[i] < min_key + list.block_size
+			int block_index = keys[i] - current->min_key ;
 			memcpy(current->values + (block_index * list.item_size), items[i], list.item_size);
 			current->contained[block_index] = 1;
 			i += 1;
@@ -62,10 +62,10 @@ void block_remove(struct block_list list, long int *keys, int n_keys) {
 
 	int i = 0;
 	while (current != 0x0 && i < n_keys) {
-		if (keys[i] >= current->min_value + list.block_size) {
+		if (keys[i] >= current->min_key + list.block_size) {
 			current = current->next;
-		} else if (keys[i] >= current->min_value) {// keys[i] < min_value + list.block_size
-			int block_index = keys[i] - current->min_value;
+		} else if (keys[i] >= current->min_key ) {// keys[i] < min_key + list.block_size
+			int block_index = keys[i] - current->min_key ;
 			current->contained[block_index] = 0;
 			i += 1;
 		} else {
@@ -101,10 +101,10 @@ void block_act(struct esdb *db, void (*f)(struct esdb *, void **), int n_lists, 
         for (i = 0; i < n_lists; ++i) {
             for (j = i + 1; j < n_lists; ++j) {
                 if (blocks[i] == 0x0 || blocks[j] == 0x0) return;
-                if (blocks[i]->min_value < blocks[j]->min_value) {
+                if (blocks[i]->min_key < blocks[j]->min_key ) {
                     blocks[i] = blocks[i]->next;
                     allEqual = 0;
-                } else if (blocks[i]->min_value > blocks[j]->min_value) {
+                } else if (blocks[i]->min_key > blocks[j]->min_key ) {
                     blocks[j] = blocks[j]->next;
                     allEqual = 0;
                 }
