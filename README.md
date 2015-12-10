@@ -20,7 +20,7 @@ void free_entity(struct esdb *db, long int id);
 void swap_buffers(struct esdb *db);
 ```
 
-To initialize a DB, you use `make_esdb` and `register_component`. The first_id 
+To initialize a DB, you use `make_esdb` and `register_component`. The `first_id` 
 parameter is the first entity ID to use (so that you can reserve space 
 for zero or somesuch), and `block_size` is the number of components to put in each
 block for the internal block list (block lists will be explained later). A good
@@ -50,3 +50,40 @@ interfere with ongoing iteration. `id` is the ID of the entity to remove.
 
 `swap_buffers` should be run at the end of the frame to enact all the queued 
 changes, and to swap the data buffers in the block lists.
+
+## Block lists
+Block lists are the underlying data structure for the database. Blocks hold
+a fixed number of components laid out in order by entity ID. Blocks are laid
+out like this:
+
+```c
+struct block {
+    int min_key;
+    char *contained;
+    char *values;
+    char *buffer;
+    struct block *next;
+};
+```
+
+A block list with some data in it looks like this (with data assumed in values):
+
+```
++--------------------+    +--------------------+    +-------------------+
+|min_key:   0        | -> |min_key: 8          | -> |min_key: 32        |
+|contained: 00011011 |    |contained: 10111111 |    |contained: 0000100 |
++--------------------+    +--------------------+    +-------------------+
+```
+
+The `min_key` is the entity ID of the first component of the block, and
+`contained` is an array of boolean values telling you whether each slot is
+filled. This allows for some level of sparseness, while still optimizing
+for larger blocks in memory.
+
+A set of block lists are iterated together in an algorithm similar to a merge
+operation.
+
+Larger blocks are more effective on dense data where most entities have that
+component, and smaller blocks are more effective on sparser data.
+
+
